@@ -21,6 +21,7 @@ export default function OwnerModal({ open, data, onClose }: Props) {
   if (!open || !data) return null;
 
   const waLink = `https://wa.me/${data.phone.replace(/\D/g, "")}`;
+  const mapsLink = `https://www.google.com/maps?q=${data.lat},${data.lng}`;
 
   return (
     <div
@@ -39,10 +40,11 @@ export default function OwnerModal({ open, data, onClose }: Props) {
           <p className="text-xl">{data.shortDesc}</p>
         </div>
 
-        <div className="p-6 space-y-2">
+        <div className="p-6 space-y-3">
           <p className="text-xl">{data.dusun}</p>
           <p className="text-xl">No. HP: {data.phone}</p>
 
+          {/* WhatsApp */}
           <a
             href={waLink}
             target="_blank"
@@ -51,6 +53,17 @@ export default function OwnerModal({ open, data, onClose }: Props) {
           >
             <span className="text-2xl">🟢</span>
             Hubungi melalui WhatsApp
+          </a>
+
+          {/* Google Maps */}
+          <a
+            href={mapsLink}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex w-full items-center justify-center gap-3 bg-blue-600 text-white py-4 font-semibold text-lg hover:bg-blue-700"
+          >
+            <span className="text-2xl">📍</span>
+            Buka di Google Maps
           </a>
         </div>
       </div>
