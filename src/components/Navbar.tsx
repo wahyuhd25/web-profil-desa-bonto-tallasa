@@ -4,10 +4,13 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import LoginModal from "@/components/ui/LoginModal";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function Navbar() {
   const [openLogin, setOpenLogin] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [authed, setAuthed] = useState<boolean | null>(null); // null = belum dicek
   const router = useRouter();
 
   useEffect(() => {
@@ -15,6 +18,13 @@ export default function Navbar() {
     onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setAuthed(!!user);
+    });
+    return () => unsub();
   }, []);
 
   return (
@@ -54,10 +64,18 @@ export default function Navbar() {
             <a href="#peta">PETA</a>
             <a href="#kontak">KONTAK</a>
 
-            {/* tombol login (kamu bilang sudah ada; taruh di sini kalau belum) */}
-            <button type="button" onClick={() => setOpenLogin(true)}>
-              MASUK
-            </button>
+            {/* Auth-aware button */}
+            {authed === false && (
+              <button type="button" onClick={() => setOpenLogin(true)}>
+                MASUK
+              </button>
+            )}
+
+            {authed === true && (
+              <button type="button" onClick={() => router.push("/admin")}>
+                ADMIN
+              </button>
+            )}
           </div>
         </div>
       </nav>
