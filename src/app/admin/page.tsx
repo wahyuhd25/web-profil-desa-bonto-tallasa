@@ -6,11 +6,23 @@ import { auth } from "@/lib/firebase";
 import type { FarmPoint } from "@/types/farm";
 import { createFarm, deleteFarm, listFarms, updateFarm } from "@/lib/farms";
 
-type FormState = Omit<FarmPoint, "id">;
+/**
+ * NOTE:
+ * - lat & lng disimpan sebagai STRING di form
+ * - baru di-convert ke number saat submit
+ */
+type FormState = {
+  lat: string;
+  lng: string;
+  ownerName: string;
+  shortDesc: string;
+  dusun: string;
+  phone: string;
+};
 
 const emptyForm: FormState = {
-  lat: -5.5,
-  lng: 120.0,
+  lat: "-5.5",      // default string, boleh kamu ganti
+  lng: "120.0",     // default string, boleh kamu ganti
   ownerName: "",
   shortDesc: "",
   dusun: "",
@@ -49,13 +61,16 @@ export default function AdminPage() {
   }, [authed]);
 
   const canSubmit = useMemo(() => {
+    const latNum = Number(form.lat.replace(",", "."));
+    const lngNum = Number(form.lng.replace(",", "."));
+
     return (
       form.ownerName.trim().length > 0 &&
       form.shortDesc.trim().length > 0 &&
       form.dusun.trim().length > 0 &&
       form.phone.trim().length > 0 &&
-      Number.isFinite(form.lat) &&
-      Number.isFinite(form.lng)
+      Number.isFinite(latNum) &&
+      Number.isFinite(lngNum)
     );
   }, [form]);
 
@@ -75,12 +90,21 @@ export default function AdminPage() {
   }
 
   async function handleSubmit() {
-    if (!canSubmit) return;
+    const latNum = Number(form.lat.replace(",", "."));
+    const lngNum = Number(form.lng.replace(",", "."));
 
-    const payload: FormState = {
-      ...form,
-      lat: Number(form.lat),
-      lng: Number(form.lng),
+    if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
+      alert("Latitude/Longitude tidak valid.");
+      return;
+    }
+
+    const payload = {
+      ownerName: form.ownerName.trim(),
+      shortDesc: form.shortDesc.trim(),
+      dusun: form.dusun.trim(),
+      phone: form.phone.trim(),
+      lat: latNum,
+      lng: lngNum,
     };
 
     setLoading(true);
@@ -127,38 +151,47 @@ export default function AdminPage() {
             className="rounded-lg border px-4 py-3"
             placeholder="Nama pemilik"
             value={form.ownerName}
-            onChange={(e) => setForm((s) => ({ ...s, ownerName: e.target.value }))}
+            onChange={(e) =>
+              setForm((s) => ({ ...s, ownerName: e.target.value }))
+            }
           />
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="Deskripsi singkat (contoh: Petani Jagung dan Cabai)"
             value={form.shortDesc}
-            onChange={(e) => setForm((s) => ({ ...s, shortDesc: e.target.value }))}
+            onChange={(e) =>
+              setForm((s) => ({ ...s, shortDesc: e.target.value }))
+            }
           />
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="Dusun (contoh: Batu Sodong)"
             value={form.dusun}
-            onChange={(e) => setForm((s) => ({ ...s, dusun: e.target.value }))}
+            onChange={(e) =>
+              setForm((s) => ({ ...s, dusun: e.target.value }))
+            }
           />
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="No HP (+62...)"
             value={form.phone}
-            onChange={(e) => setForm((s) => ({ ...s, phone: e.target.value }))}
+            onChange={(e) =>
+              setForm((s) => ({ ...s, phone: e.target.value }))
+            }
           />
 
+          {/* LAT / LNG SEKARANG STRING BEBAS "-" DSB */}
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="Latitude"
-            value={String(form.lat)}
-            onChange={(e) => setForm((s) => ({ ...s, lat: Number(e.target.value) }))}
+            value={form.lat}
+            onChange={(e) => setForm((s) => ({ ...s, lat: e.target.value }))}
           />
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="Longitude"
-            value={String(form.lng)}
-            onChange={(e) => setForm((s) => ({ ...s, lng: Number(e.target.value) }))}
+            value={form.lng}
+            onChange={(e) => setForm((s) => ({ ...s, lng: e.target.value }))}
           />
         </div>
 
@@ -189,7 +222,11 @@ export default function AdminPage() {
       <div className="mt-6 rounded-xl border bg-white overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h2 className="text-xl font-bold">Daftar Titik</h2>
-          <button className="text-sm underline" onClick={refresh} disabled={loading}>
+          <button
+            className="text-sm underline"
+            onClick={refresh}
+            disabled={loading}
+          >
             Refresh
           </button>
         </div>
@@ -223,8 +260,8 @@ export default function AdminPage() {
                         onClick={() => {
                           setEditingId(r.id);
                           setForm({
-                            lat: r.lat,
-                            lng: r.lng,
+                            lat: String(r.lat),
+                            lng: String(r.lng),
                             ownerName: r.ownerName,
                             shortDesc: r.shortDesc,
                             dusun: r.dusun,
