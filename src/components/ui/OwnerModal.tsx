@@ -23,7 +23,10 @@ export default function OwnerModal({ open, data, onClose }: Props) {
   const waLink = `https://wa.me/${data.phone.replace(/\D/g, "")}`;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 px-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4"
+      onClick={onClose}
+    >
       <div
         className="w-full max-w-md bg-white border-2 border-black shadow-[0_10px_0_rgba(0,0,0,1)]"
         onClick={(e) => e.stopPropagation()}
