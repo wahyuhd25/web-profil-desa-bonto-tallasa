@@ -34,10 +34,10 @@ export default function MapLeaflet() {
     <div className="w-full">
       <div className="h-[520px] w-full overflow-hidden rounded-xl border">
         <MapContainer center={center} zoom={13} className="h-full w-full">
-          <TileLayer
-            attribution='&copy; OpenStreetMap contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+<TileLayer
+  attribution='&copy; OpenStreetMap &copy; CARTO'
+  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+/>
 
           {rows.map((p) => (
             <Marker
