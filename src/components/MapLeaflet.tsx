@@ -18,6 +18,9 @@ const icon = L.icon({
   iconAnchor: [12, 41],
 });
 
+const DEFAULT_CENTER: [number, number] = [-5.497362, 119.891077];
+const DEFAULT_ZOOM = 15;
+
 export default function MapLeaflet() {
   const [rows, setRows] = useState<FarmPoint[]>([]);
   const [selected, setSelected] = useState<FarmPoint | null>(null);
@@ -26,18 +29,19 @@ export default function MapLeaflet() {
     listFarms().then(setRows);
   }, []);
 
-  const center: [number, number] = rows.length
-    ? [rows[0].lat, rows[0].lng]
-    : [-5.5, 120.0];
-
   return (
     <div className="w-full">
-      <div className="h-[520px] w-full overflow-hidden rounded-xl border">
-        <MapContainer center={center} zoom={13} className="h-full w-full">
-<TileLayer
-  attribution='&copy; OpenStreetMap &copy; CARTO'
-  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-/>
+      {/* Map wrapper with LOW z-index */}
+      <div className="relative z-0 h-[520px] w-full overflow-hidden rounded-xl border">
+        <MapContainer
+          center={DEFAULT_CENTER}
+          zoom={DEFAULT_ZOOM}
+          className="h-full w-full z-0"
+        >
+          <TileLayer
+            attribution='&copy; OpenStreetMap &copy; CARTO'
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          />
 
           {rows.map((p) => (
             <Marker
@@ -52,7 +56,12 @@ export default function MapLeaflet() {
         </MapContainer>
       </div>
 
-      <OwnerModal open={!!selected} data={selected} onClose={() => setSelected(null)} />
+      {/* Modal stays above everything */}
+      <OwnerModal
+        open={!!selected}
+        data={selected}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 }
