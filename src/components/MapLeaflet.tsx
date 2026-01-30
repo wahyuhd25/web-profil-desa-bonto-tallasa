@@ -12,7 +12,8 @@ import OwnerModal from "@/components/ui/OwnerModal";
 // Fix default marker icon (leaflet sering blank di bundler)
 const icon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -39,20 +40,30 @@ export default function MapLeaflet() {
           className="h-full w-full z-0"
         >
           <TileLayer
-            attribution='&copy; OpenStreetMap &copy; CARTO'
+            attribution="&copy; OpenStreetMap &copy; CARTO"
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           />
 
-          {rows.map((p) => (
-            <Marker
-              key={p.id}
-              position={[p.lat, p.lng]}
-              icon={icon}
-              eventHandlers={{
-                click: () => setSelected(p),
-              }}
-            />
-          ))}
+          {rows.map((p) => {
+            const lat = Number(p.lat);
+            const lng = Number(p.lng);
+
+            // ⛔ skip marker kalau koordinat tidak valid
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+              return null;
+            }
+
+            return (
+              <Marker
+                key={p.id}
+                position={[lat, lng]}
+                icon={icon}
+                eventHandlers={{
+                  click: () => setSelected(p),
+                }}
+              />
+            );
+          })}
         </MapContainer>
       </div>
 

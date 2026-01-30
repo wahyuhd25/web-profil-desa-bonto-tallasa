@@ -7,8 +7,11 @@ import type { FarmPoint } from "@/types/farm";
 import { createFarm, deleteFarm, listFarms, updateFarm } from "@/lib/farms";
 import { useRouter } from "next/navigation";
 
-
-type FormState = Omit<FarmPoint, "id">;
+// Form menggunakan string untuk lat/lng agar tidak muncul NaN saat input kosong
+type FormState = Omit<FarmPoint, "id" | "lat" | "lng"> & {
+  lat: string;
+  lng: string;
+};
 
 const COMMODITY_OPTIONS = [
   { id: "corn", label: "Jagung", emoji: "🌽" },
@@ -21,19 +24,19 @@ const COMMODITY_OPTIONS = [
 ];
 
 const emptyForm: FormState = {
-  lat: -5.5,
-  lng: 120.0,
+  lat: "-5.5",
+  lng: "120.0",
   ownerName: "",
   shortDesc: "",
   dusun: "",
   phone: "",
-  commodities: [], // 👈 penting untuk form
+  commodities: [],
 };
 
 export default function AdminPage() {
   const [ready, setReady] = useState(false);
   const [authed, setAuthed] = useState(false);
-  
+
   const router = useRouter();
 
   const [rows, setRows] = useState<FarmPoint[]>([]);
@@ -64,13 +67,16 @@ export default function AdminPage() {
   }, [authed]);
 
   const canSubmit = useMemo(() => {
+    const latNum = Number(form.lat);
+    const lngNum = Number(form.lng);
+
     return (
       form.ownerName.trim().length > 0 &&
       form.shortDesc.trim().length > 0 &&
       form.dusun.trim().length > 0 &&
       form.phone.trim().length > 0 &&
-      Number.isFinite(form.lat) &&
-      Number.isFinite(form.lng)
+      Number.isFinite(latNum) &&
+      Number.isFinite(lngNum)
     );
   }, [form]);
 
@@ -92,11 +98,18 @@ export default function AdminPage() {
   async function handleSubmit() {
     if (!canSubmit) return;
 
-    const payload: FormState = {
+    const latNum = Number(form.lat);
+    const lngNum = Number(form.lng);
+
+    if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
+      return;
+    }
+
+    const payload: Omit<FarmPoint, "id"> = {
       ...form,
-      lat: Number(form.lat),
-      lng: Number(form.lng),
-      commodities: form.commodities ?? [], // pastikan tidak undefined
+      lat: latNum,
+      lng: lngNum,
+      commodities: form.commodities ?? [],
     };
 
     setLoading(true);
@@ -129,31 +142,30 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
- <div className="flex items-center justify-between gap-4">
-  <div>
-    <h1 className="text-3xl font-bold">Kelola Titik Pemilik Sawah</h1>
-    <p className="text-gray-600 mt-1">
-      Tambah/Edit/Hapus titik, lalu otomatis muncul di peta publik.
-    </p>
-  </div>
+      {/* HEADER */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Kelola Titik Pemilik Sawah</h1>
+          <p className="text-gray-600 mt-1">
+            Tambah/Edit/Hapus titik, lalu otomatis muncul di peta publik.
+          </p>
+        </div>
 
-  <div className="flex gap-3">
-    <button
-      className="rounded-lg border px-4 py-2 hover:bg-gray-50"
-      onClick={() => router.push("/")}
-    >
-      ← Kembali ke Beranda
-    </button>
-
-    <button
-      className="rounded-lg border px-4 py-2 hover:bg-gray-50"
-      onClick={() => signOut(auth)}
-    >
-      Logout
-    </button>
-  </div>
-</div>
-
+        <div className="flex items-center gap-3">
+          <button
+            className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+            onClick={() => router.push("/")}
+          >
+            Kembali ke Beranda
+          </button>
+          <button
+            className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+            onClick={() => signOut(auth)}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
 
       {/* FORM */}
       <div className="mt-8 rounded-xl border bg-white p-6">
@@ -194,18 +206,14 @@ export default function AdminPage() {
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="Latitude"
-            value={String(form.lat)}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, lat: Number(e.target.value) }))
-            }
+            value={form.lat}
+            onChange={(e) => setForm((s) => ({ ...s, lat: e.target.value }))}
           />
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="Longitude"
-            value={String(form.lng)}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, lng: Number(e.target.value) }))
-            }
+            value={form.lng}
+            onChange={(e) => setForm((s) => ({ ...s, lng: e.target.value }))}
           />
 
           {/* Komoditas / peran */}
@@ -321,8 +329,8 @@ export default function AdminPage() {
                         onClick={() => {
                           setEditingId(r.id);
                           setForm({
-                            lat: r.lat,
-                            lng: r.lng,
+                            lat: String(r.lat),
+                            lng: String(r.lng),
                             ownerName: r.ownerName,
                             shortDesc: r.shortDesc,
                             dusun: r.dusun,
