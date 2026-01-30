@@ -5,33 +5,36 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import type { FarmPoint } from "@/types/farm";
 import { createFarm, deleteFarm, listFarms, updateFarm } from "@/lib/farms";
+import { useRouter } from "next/navigation";
 
-/**
- * NOTE:
- * - lat & lng disimpan sebagai STRING di form
- * - baru di-convert ke number saat submit
- */
-type FormState = {
-  lat: string;
-  lng: string;
-  ownerName: string;
-  shortDesc: string;
-  dusun: string;
-  phone: string;
-};
+
+type FormState = Omit<FarmPoint, "id">;
+
+const COMMODITY_OPTIONS = [
+  { id: "corn", label: "Jagung", emoji: "🌽" },
+  { id: "tomato", label: "Tomat", emoji: "🍅" },
+  { id: "eggplant", label: "Terong", emoji: "🍆" },
+  { id: "grape", label: "Anggur", emoji: "🍇" },
+  { id: "chili", label: "Cabai", emoji: "🌶️" },
+  { id: "rice", label: "Padi", emoji: "🌾" },
+  { id: "village_staff", label: "Aparat Desa", emoji: "🏛️" },
+];
 
 const emptyForm: FormState = {
-  lat: "-5.5",      // default string, boleh kamu ganti
-  lng: "120.0",     // default string, boleh kamu ganti
+  lat: -5.5,
+  lng: 120.0,
   ownerName: "",
   shortDesc: "",
   dusun: "",
   phone: "",
+  commodities: [], // 👈 penting untuk form
 };
 
 export default function AdminPage() {
   const [ready, setReady] = useState(false);
   const [authed, setAuthed] = useState(false);
+  
+  const router = useRouter();
 
   const [rows, setRows] = useState<FarmPoint[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,16 +64,13 @@ export default function AdminPage() {
   }, [authed]);
 
   const canSubmit = useMemo(() => {
-    const latNum = Number(form.lat.replace(",", "."));
-    const lngNum = Number(form.lng.replace(",", "."));
-
     return (
       form.ownerName.trim().length > 0 &&
       form.shortDesc.trim().length > 0 &&
       form.dusun.trim().length > 0 &&
       form.phone.trim().length > 0 &&
-      Number.isFinite(latNum) &&
-      Number.isFinite(lngNum)
+      Number.isFinite(form.lat) &&
+      Number.isFinite(form.lng)
     );
   }, [form]);
 
@@ -90,21 +90,13 @@ export default function AdminPage() {
   }
 
   async function handleSubmit() {
-    const latNum = Number(form.lat.replace(",", "."));
-    const lngNum = Number(form.lng.replace(",", "."));
+    if (!canSubmit) return;
 
-    if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
-      alert("Latitude/Longitude tidak valid.");
-      return;
-    }
-
-    const payload = {
-      ownerName: form.ownerName.trim(),
-      shortDesc: form.shortDesc.trim(),
-      dusun: form.dusun.trim(),
-      phone: form.phone.trim(),
-      lat: latNum,
-      lng: lngNum,
+    const payload: FormState = {
+      ...form,
+      lat: Number(form.lat),
+      lng: Number(form.lng),
+      commodities: form.commodities ?? [], // pastikan tidak undefined
     };
 
     setLoading(true);
@@ -122,23 +114,46 @@ export default function AdminPage() {
     }
   }
 
+  function toggleCommodity(id: string) {
+    setForm((prev) => {
+      const current = prev.commodities ?? [];
+      const exists = current.includes(id);
+      return {
+        ...prev,
+        commodities: exists
+          ? current.filter((c) => c !== id)
+          : [...current, id],
+      };
+    });
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Kelola Titik Pemilik Sawah</h1>
-          <p className="text-gray-600 mt-1">
-            Tambah/Edit/Hapus titik, lalu otomatis muncul di peta publik.
-          </p>
-        </div>
+ <div className="flex items-center justify-between gap-4">
+  <div>
+    <h1 className="text-3xl font-bold">Kelola Titik Pemilik Sawah</h1>
+    <p className="text-gray-600 mt-1">
+      Tambah/Edit/Hapus titik, lalu otomatis muncul di peta publik.
+    </p>
+  </div>
 
-        <button
-          className="rounded-lg border px-4 py-2 hover:bg-gray-50"
-          onClick={() => signOut(auth)}
-        >
-          Logout
-        </button>
-      </div>
+  <div className="flex gap-3">
+    <button
+      className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+      onClick={() => router.push("/")}
+    >
+      ← Kembali ke Beranda
+    </button>
+
+    <button
+      className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+      onClick={() => signOut(auth)}
+    >
+      Logout
+    </button>
+  </div>
+</div>
+
 
       {/* FORM */}
       <div className="mt-8 rounded-xl border bg-white p-6">
@@ -167,32 +182,59 @@ export default function AdminPage() {
             className="rounded-lg border px-4 py-3"
             placeholder="Dusun (contoh: Batu Sodong)"
             value={form.dusun}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, dusun: e.target.value }))
-            }
+            onChange={(e) => setForm((s) => ({ ...s, dusun: e.target.value }))}
           />
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="No HP (+62...)"
             value={form.phone}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, phone: e.target.value }))
-            }
+            onChange={(e) => setForm((s) => ({ ...s, phone: e.target.value }))}
           />
 
-          {/* LAT / LNG SEKARANG STRING BEBAS "-" DSB */}
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="Latitude"
-            value={form.lat}
-            onChange={(e) => setForm((s) => ({ ...s, lat: e.target.value }))}
+            value={String(form.lat)}
+            onChange={(e) =>
+              setForm((s) => ({ ...s, lat: Number(e.target.value) }))
+            }
           />
           <input
             className="rounded-lg border px-4 py-3"
             placeholder="Longitude"
-            value={form.lng}
-            onChange={(e) => setForm((s) => ({ ...s, lng: e.target.value }))}
+            value={String(form.lng)}
+            onChange={(e) =>
+              setForm((s) => ({ ...s, lng: Number(e.target.value) }))
+            }
           />
+
+          {/* Komoditas / peran */}
+          <div className="md:col-span-2">
+            <p className="mb-2 text-sm font-semibold text-gray-700">
+              Komoditas / Peran (bisa pilih lebih dari satu)
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {COMMODITY_OPTIONS.map((opt) => {
+                const active = (form.commodities ?? []).includes(opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => toggleCommodity(opt.id)}
+                    className={[
+                      "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm",
+                      active
+                        ? "bg-green-100 border-green-500 text-green-800"
+                        : "bg-white hover:bg-gray-50",
+                    ].join(" ")}
+                  >
+                    <span className="text-lg">{opt.emoji}</span>
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         <div className="mt-5 flex gap-3">
@@ -240,6 +282,7 @@ export default function AdminPage() {
                 <th className="px-6 py-3">Dusun</th>
                 <th className="px-6 py-3">Telepon</th>
                 <th className="px-6 py-3">Lat/Lng</th>
+                <th className="px-6 py-3">Komoditas</th>
                 <th className="px-6 py-3 w-[160px]">Aksi</th>
               </tr>
             </thead>
@@ -253,6 +296,24 @@ export default function AdminPage() {
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {r.lat}, {r.lng}
                   </td>
+                  <td className="px-6 py-4 text-xl">
+                    {r.commodities && r.commodities.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {r.commodities.map((id) => {
+                          const opt = COMMODITY_OPTIONS.find(
+                            (o) => o.id === id
+                          );
+                          return (
+                            <span key={id} title={opt?.label ?? id}>
+                              {opt?.emoji ?? "❓"}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-400">-</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
                       <button
@@ -260,12 +321,13 @@ export default function AdminPage() {
                         onClick={() => {
                           setEditingId(r.id);
                           setForm({
-                            lat: String(r.lat),
-                            lng: String(r.lng),
+                            lat: r.lat,
+                            lng: r.lng,
                             ownerName: r.ownerName,
                             shortDesc: r.shortDesc,
                             dusun: r.dusun,
                             phone: r.phone,
+                            commodities: r.commodities ?? [],
                           });
                         }}
                       >
@@ -293,7 +355,7 @@ export default function AdminPage() {
 
               {rows.length === 0 && (
                 <tr>
-                  <td className="px-6 py-10 text-gray-600" colSpan={6}>
+                  <td className="px-6 py-10 text-gray-600" colSpan={7}>
                     {loading ? "Memuat..." : "Belum ada data titik."}
                   </td>
                 </tr>
