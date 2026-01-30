@@ -7,10 +7,14 @@ import type { FarmPoint } from "@/types/farm";
 import { createFarm, deleteFarm, listFarms, updateFarm } from "@/lib/farms";
 import { useRouter } from "next/navigation";
 
+// definisikan type marker secara eksplisit (harus sama dengan di FarmPoint)
+type MarkerType = "farmer" | "shop" | "gov";
+
 // Form menggunakan string untuk lat/lng agar tidak muncul NaN saat input kosong
 type FormState = Omit<FarmPoint, "id" | "lat" | "lng"> & {
   lat: string;
   lng: string;
+  markerType: MarkerType;
 };
 
 const COMMODITY_OPTIONS = [
@@ -23,6 +27,13 @@ const COMMODITY_OPTIONS = [
   { id: "village_staff", label: "Aparat Desa", emoji: "🏛️" },
 ];
 
+// 👇 opsi jenis lokasi untuk menentukan emoji marker di peta
+const SUBJECT_OPTIONS: { id: MarkerType; label: string; emoji: string }[] = [
+  { id: "farmer", label: "Petani / Lahan", emoji: "👨‍🌾" },
+  { id: "shop", label: "Toko / Warung", emoji: "🏪" },
+  { id: "gov", label: "Kantor / Fasilitas Umum", emoji: "🏛️" },
+];
+
 const emptyForm: FormState = {
   lat: "-5.5",
   lng: "120.0",
@@ -31,6 +42,7 @@ const emptyForm: FormState = {
   dusun: "",
   phone: "",
   commodities: [],
+  markerType: "farmer", // default jenis lokasi
 };
 
 export default function AdminPage() {
@@ -95,37 +107,41 @@ export default function AdminPage() {
     );
   }
 
-  async function handleSubmit() {
-    if (!canSubmit) return;
+async function handleSubmit() {
+  if (!canSubmit) return;
 
-    const latNum = Number(form.lat);
-    const lngNum = Number(form.lng);
+  const latNum = Number(form.lat);
+  const lngNum = Number(form.lng);
 
-    if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
-      return;
-    }
-
-    const payload: Omit<FarmPoint, "id"> = {
-      ...form,
-      lat: latNum,
-      lng: lngNum,
-      commodities: form.commodities ?? [],
-    };
-
-    setLoading(true);
-    try {
-      if (editingId) {
-        await updateFarm(editingId, payload);
-      } else {
-        await createFarm(payload);
-      }
-      setForm(emptyForm);
-      setEditingId(null);
-      await refresh();
-    } finally {
-      setLoading(false);
-    }
+  if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
+    return;
   }
+
+  // Pecah dulu form supaya lat/lng string tidak ikut ke payload
+  const { lat, lng, ...rest } = form;
+
+  const payload: Omit<FarmPoint, "id"> = {
+    ...rest,
+    lat: latNum,
+    lng: lngNum,
+    commodities: form.commodities ?? [],
+    markerType: form.markerType, // 👈 penting untuk peta
+  };
+
+  setLoading(true);
+  try {
+    if (editingId) {
+      await updateFarm(editingId, payload);
+    } else {
+      await createFarm(payload);
+    }
+    setForm(emptyForm);
+    setEditingId(null);
+    await refresh();
+  } finally {
+    setLoading(false);
+  }
+}
 
   function toggleCommodity(id: string) {
     setForm((prev) => {
@@ -202,6 +218,36 @@ export default function AdminPage() {
             value={form.phone}
             onChange={(e) => setForm((s) => ({ ...s, phone: e.target.value }))}
           />
+
+          {/* Tipe lokasi / subject (single select) */}
+          <div className="md:col-span-2">
+            <p className="mb-2 text-sm font-semibold text-gray-700">
+              Tipe Lokasi (untuk emoji marker di peta)
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {SUBJECT_OPTIONS.map((opt) => {
+                const active = form.markerType === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() =>
+                      setForm((s) => ({ ...s, markerType: opt.id }))
+                    }
+                    className={[
+                      "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm",
+                      active
+                        ? "bg-blue-100 border-blue-500 text-blue-800"
+                        : "bg-white hover:bg-gray-50",
+                    ].join(" ")}
+                  >
+                    <span className="text-lg">{opt.emoji}</span>
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           <input
             className="rounded-lg border px-4 py-3"
@@ -290,80 +336,94 @@ export default function AdminPage() {
                 <th className="px-6 py-3">Dusun</th>
                 <th className="px-6 py-3">Telepon</th>
                 <th className="px-6 py-3">Lat/Lng</th>
+                <th className="px-6 py-3">Tipe Lokasi</th>
                 <th className="px-6 py-3">Komoditas</th>
                 <th className="px-6 py-3 w-[160px]">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} className="border-t">
-                  <td className="px-6 py-4 font-semibold">{r.ownerName}</td>
-                  <td className="px-6 py-4">{r.shortDesc}</td>
-                  <td className="px-6 py-4">{r.dusun}</td>
-                  <td className="px-6 py-4">{r.phone}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {r.lat}, {r.lng}
-                  </td>
-                  <td className="px-6 py-4 text-xl">
-                    {r.commodities && r.commodities.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {r.commodities.map((id) => {
-                          const opt = COMMODITY_OPTIONS.find(
-                            (o) => o.id === id
-                          );
-                          return (
-                            <span key={id} title={opt?.label ?? id}>
-                              {opt?.emoji ?? "❓"}
-                            </span>
-                          );
-                        })}
+              {rows.map((r) => {
+                const subject = SUBJECT_OPTIONS.find(
+                  (o) => o.id === r.markerType
+                );
+                return (
+                  <tr key={r.id} className="border-t">
+                    <td className="px-6 py-4 font-semibold">{r.ownerName}</td>
+                    <td className="px-6 py-4">{r.shortDesc}</td>
+                    <td className="px-6 py-4">{r.dusun}</td>
+                    <td className="px-6 py-4">{r.phone}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {r.lat}, {r.lng}
+                    </td>
+                    <td className="px-6 py-4 text-xl">
+                      {subject ? (
+                        <span title={subject.label}>{subject.emoji}</span>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-xl">
+                      {r.commodities && r.commodities.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {r.commodities.map((id) => {
+                            const opt = COMMODITY_OPTIONS.find(
+                              (o) => o.id === id
+                            );
+                            return (
+                              <span key={id} title={opt?.label ?? id}>
+                                {opt?.emoji ?? "❓"}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <button
+                          className="rounded-lg border px-3 py-2 hover:bg-gray-50"
+                          onClick={() => {
+                            setEditingId(r.id);
+                            setForm({
+                              lat: String(r.lat),
+                              lng: String(r.lng),
+                              ownerName: r.ownerName,
+                              shortDesc: r.shortDesc,
+                              dusun: r.dusun,
+                              phone: r.phone,
+                              commodities: r.commodities ?? [],
+                              markerType: r.markerType ?? "farmer",
+                            });
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="rounded-lg border px-3 py-2 hover:bg-red-50 text-red-600"
+                          onClick={async () => {
+                            if (!confirm("Hapus titik ini?")) return;
+                            setLoading(true);
+                            try {
+                              await deleteFarm(r.id);
+                              await refresh();
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                        >
+                          Hapus
+                        </button>
                       </div>
-                    ) : (
-                      <span className="text-sm text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button
-                        className="rounded-lg border px-3 py-2 hover:bg-gray-50"
-                        onClick={() => {
-                          setEditingId(r.id);
-                          setForm({
-                            lat: String(r.lat),
-                            lng: String(r.lng),
-                            ownerName: r.ownerName,
-                            shortDesc: r.shortDesc,
-                            dusun: r.dusun,
-                            phone: r.phone,
-                            commodities: r.commodities ?? [],
-                          });
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="rounded-lg border px-3 py-2 hover:bg-red-50 text-red-600"
-                        onClick={async () => {
-                          if (!confirm("Hapus titik ini?")) return;
-                          setLoading(true);
-                          try {
-                            await deleteFarm(r.id);
-                            await refresh();
-                          } finally {
-                            setLoading(false);
-                          }
-                        }}
-                      >
-                        Hapus
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
 
               {rows.length === 0 && (
                 <tr>
-                  <td className="px-6 py-10 text-gray-600" colSpan={7}>
+                  <td className="px-6 py-10 text-gray-600" colSpan={8}>
                     {loading ? "Memuat..." : "Belum ada data titik."}
                   </td>
                 </tr>

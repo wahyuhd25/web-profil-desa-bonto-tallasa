@@ -9,18 +9,25 @@ import type { FarmPoint } from "@/types/farm";
 import { listFarms } from "@/lib/farms";
 import OwnerModal from "@/components/ui/OwnerModal";
 
-// Fix default marker icon (leaflet sering blank di bundler)
-const icon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-
 const DEFAULT_CENTER: [number, number] = [-5.497362, 119.891077];
 const DEFAULT_ZOOM = 15;
+
+// Mapping markerType -> emoji
+const SUBJECT_EMOJI: Record<string, string> = {
+  farmer: "👨‍🌾",
+  shop: "🏪",
+  gov: "🏛️",
+};
+
+// Helper: create Leaflet divIcon with emoji
+function createEmojiIcon(emoji: string) {
+  return L.divIcon({
+    className: "", // biar nggak ketimpa style bawaan leaflet
+    html: `<span style="font-size: 28px; line-height: 1;">${emoji}</span>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 28],
+  });
+}
 
 export default function MapLeaflet() {
   const [rows, setRows] = useState<FarmPoint[]>([]);
@@ -53,11 +60,14 @@ export default function MapLeaflet() {
               return null;
             }
 
+            const emoji =
+              SUBJECT_EMOJI[p.markerType ?? "farmer"] ?? "📍";
+
             return (
               <Marker
                 key={p.id}
                 position={[lat, lng]}
-                icon={icon}
+                icon={createEmojiIcon(emoji)}
                 eventHandlers={{
                   click: () => setSelected(p),
                 }}
