@@ -8,12 +8,16 @@ import Kontak from "@/sections/Kontak";
 
 export default function Home() {
   return (
-    <main className="min-h-screen font-sans">
+    <main className="min-h-screen font-sans flex flex-col">
       <Navbar />
-      <Hero />
-      <Profil />
-      <Peta />
-      <Kontak />
+
+      {/* Content grows and scrolls, footer stays at the bottom */}
+      <div className="flex-1">
+        <Hero />
+        <Profil />
+        <Peta />
+        <Kontak />
+      </div>
       <Footer />
     </main>
   );
