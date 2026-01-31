@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -13,7 +12,13 @@ export default function InfoCard({ title, image, onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-lg border bg-white shadow-sm hover:shadow-md transition overflow-hidden"
+      className="
+        text-left bg-black
+        shadow-md
+        hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)]
+        transition-shadow duration-300
+        overflow-hidden
+      "
     >
       <div className="relative h-60 w-full">
         <Image
@@ -24,9 +29,9 @@ export default function InfoCard({ title, image, onClick }: Props) {
         />
       </div>
 
-      <div className="p-4">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <p className="mt-1 text-sm text-gray-600">
+      <div className="p-6">
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        <p className="mt-1 text-sm text-white">
           Klik untuk melihat detail
         </p>
       </div>
