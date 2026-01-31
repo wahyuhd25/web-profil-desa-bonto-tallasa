@@ -10,8 +10,18 @@ import { auth } from "@/lib/firebase";
 export default function Navbar() {
   const [openLogin, setOpenLogin] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [authed, setAuthed] = useState<boolean | null>(null); // null = belum dicek
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  const [activeNav, setActiveNav] = useState<string>("home");
   const router = useRouter();
+
+  const navButtonClass = (key: string) =>
+    [
+      "relative px-4 py-1 transition-all duration-200 ease-out",
+      "hover:bg-black hover:text-white",
+      activeNav === key
+        ? "font-black underline decoration-3 underline-offset-4"
+        : "font-regular",
+    ].join(" ");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -36,9 +46,9 @@ export default function Navbar() {
         ].join(" ")}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          {/* LOGO + TITLE */}
+          {/* LOGO */}
           <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10">
+            <div className="relative h-10 w-10">
               <Image
                 src="/images/Bantaeng_Regency_Logo 1.png"
                 alt="Logo Desa"
@@ -58,21 +68,58 @@ export default function Navbar() {
           </div>
 
           {/* NAV LINKS */}
-          <div className="flex gap-12 font-bold text-[18px] tracking-[-1.4px]">
-            <a href="#home">HOME</a>
-            <a href="#profil">PROFIL</a>
-            <a href="#peta">PETA</a>
-            <a href="#kontak">KONTAK</a>
+          <div className="flex gap-4 text-[18px] tracking-[-1px]">
+            <a
+              href="#home"
+              className={navButtonClass("home")}
+              onClick={() => setActiveNav("home")}
+            >
+              HOME
+            </a>
+            <a
+              href="#profil"
+              className={navButtonClass("profil")}
+              onClick={() => setActiveNav("profil")}
+            >
+              PROFIL
+            </a>
+            <a
+              href="#peta"
+              className={navButtonClass("peta")}
+              onClick={() => setActiveNav("peta")}
+            >
+              PETA
+            </a>
+            <a
+              href="#kontak"
+              className={navButtonClass("kontak")}
+              onClick={() => setActiveNav("kontak")}
+            >
+              KONTAK
+            </a>
 
-            {/* Auth-aware button */}
             {authed === false && (
-              <button type="button" onClick={() => setOpenLogin(true)}>
+              <button
+                type="button"
+                className={navButtonClass("masuk")}
+                onClick={() => {
+                  setActiveNav("masuk");
+                  setOpenLogin(true);
+                }}
+              >
                 MASUK
               </button>
             )}
 
             {authed === true && (
-              <button type="button" onClick={() => router.push("/admin")}>
+              <button
+                type="button"
+                className={navButtonClass("admin")}
+                onClick={() => {
+                  setActiveNav("admin");
+                  router.push("/admin");
+                }}
+              >
                 ADMIN
               </button>
             )}
@@ -83,7 +130,10 @@ export default function Navbar() {
       <LoginModal
         open={openLogin}
         onClose={() => setOpenLogin(false)}
-        onSuccess={() => router.push("/admin")}
+        onSuccess={() => {
+          setActiveNav("admin");
+          router.push("/admin");
+        }}
       />
     </>
   );
