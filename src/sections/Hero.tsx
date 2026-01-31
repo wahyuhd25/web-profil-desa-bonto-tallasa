@@ -58,7 +58,7 @@ export default function Hero() {
       <div className="relative z-10 text-center pt-56 md:pt-82 px-4 md:px-0">
         <h3
           className="
-            text-[14px]
+            text-[15px]
             sm:text-lg
             md:text-[28px]
             text-black
@@ -85,7 +85,7 @@ export default function Hero() {
 
           <h2
             className="
-              text-[38px]
+              text-[43px]
               sm:text-[56px]
               md:text-[92px]
               font-extrabold
@@ -101,7 +101,7 @@ export default function Hero() {
       </div>
 
       {/* BLACK INFO BAR – WIDER SOLID CENTER */}
-      <div className="absolute bottom-16 md:bottom-2 left-0 w-full z-20 flex justify-center pointer-events-none">
+      <div className="absolute bottom-32 md:bottom-2 left-0 w-full z-20 flex justify-center pointer-events-none">
         <div
           className="
             px-4
@@ -135,7 +135,7 @@ export default function Hero() {
             "
           >
             {/* MOBILE TEXT */}
-            <p className="block md:hidden text-[12px] px-8">
+            <p className="block md:hidden text-[15px] px-9">
               Kec. Uluere, Kab. Bantaeng, Sulawesi Selatan
             </p>
 
