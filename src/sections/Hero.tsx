@@ -140,7 +140,7 @@ export default function Hero() {
       </div>
 
       {/* BLACK INFO BAR */}
-      <div className="absolute bottom-22 md:bottom-2 left-0 w-full z-20 flex justify-center pointer-events-none">
+      <div className="absolute bottom-22 md:bottom-0 left-0 w-full z-20 flex justify-center pointer-events-none">
         <div
           className="
             px-4
