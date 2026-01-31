@@ -85,7 +85,7 @@ export default function Hero() {
           "
         >
           {/* LOGO */}
-          <div className="relative w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 ">
+          <div className="relative w-24 h-24 sm:w-20 sm:h-20 md:w-24 md:h-24 ">
             <Image
               src="/images/Bantaeng_Regency_Logo 1.png"
               alt="Logo Desa Bonto Tallasa"
@@ -99,7 +99,7 @@ export default function Hero() {
           <div className="flex flex-col items-start leading-none md:hidden">
             <span
               className="
-                text-[42px]
+                text-[52px]
                 font-extrabold
                 text-black
                 tracking-[-2px]
@@ -110,7 +110,7 @@ export default function Hero() {
             </span>
             <span
               className="
-                text-[42px]
+                text-[52px]
                 font-extrabold
                 text-black
                 tracking-[-2px]
@@ -140,7 +140,7 @@ export default function Hero() {
       </div>
 
       {/* BLACK INFO BAR */}
-      <div className="absolute bottom-25 md:bottom-2 left-0 w-full z-20 flex justify-center pointer-events-none">
+      <div className="absolute bottom-22 md:bottom-2 left-0 w-full z-20 flex justify-center pointer-events-none">
         <div
           className="
             px-4
