@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -9,10 +9,19 @@ const jakartaSans = Plus_Jakarta_Sans({
   display: "swap", // ✅ better font loading on mobile
 });
 
+/* ✅ FIX: viewport must be exported separately in Next.js 16 */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
+/* ✅ SEO + Google Search Console verification */
 export const metadata: Metadata = {
   title: "Website Profil Desa Bonto Tallasa",
   description: "Website resmi Desa Bonto Tallasa",
-  viewport: "width=device-width, initial-scale=1", // ✅ critical for mobile
+  verification: {
+    google: "googleba992f3d376bb112",
+  },
 };
 
 export default function RootLayout({
