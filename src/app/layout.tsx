@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: "Website Profil Desa Bonto Tallasa",
   description: "Website resmi Desa Bonto Tallasa",
   verification: {
-    google: "googleba992f3d376bb112",
+    google: "73w5HzKn1ak9YZA5As9Jh1wEQ9jHtJDaImiFQ7fJpuA",
   },
 };
 
