@@ -20,8 +20,13 @@ const COMMODITY_OPTIONS = [
   { id: "grape", label: "Anggur", emoji: "🍇" },
   { id: "chili", label: "Cabai", emoji: "🌶️" },
   { id: "rice", label: "Padi", emoji: "🌾" },
+  { id: "strawberry", label: "Stroberi", emoji: "🍓" },
+  { id: "clove", label: "Cengkeh", emoji: "🌸" },
+  { id: "cocoa", label: "Coklat", emoji: "🍫" },
+  { id: "candlenut", label: "Kemiri", emoji: "🌰" },
   { id: "village_staff", label: "Aparat Desa", emoji: "🏛️" },
 ];
+
 
 export default function OwnerModal({ open, data, onClose }: Props) {
   useEffect(() => {

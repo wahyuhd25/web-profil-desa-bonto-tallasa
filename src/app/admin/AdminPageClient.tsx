@@ -24,14 +24,19 @@ const COMMODITY_OPTIONS = [
   { id: "grape", label: "Anggur", emoji: "🍇" },
   { id: "chili", label: "Cabai", emoji: "🌶️" },
   { id: "rice", label: "Padi", emoji: "🌾" },
+  { id: "strawberry", label: "Stroberi", emoji: "🍓" },
+  { id: "clove", label: "Cengkeh", emoji: "🌸" },
+  { id: "cocoa", label: "Coklat", emoji: "🍫" },
+  { id: "candlenut", label: "Kemiri", emoji: "🌰" },
   { id: "village_staff", label: "Aparat Desa", emoji: "🏛️" },
 ];
 
-// 👇 opsi jenis lokasi untuk menentukan emoji marker di peta
+
+
 const SUBJECT_OPTIONS: { id: MarkerType; label: string; emoji: string }[] = [
   { id: "farmer", label: "Petani / Lahan", emoji: "👨‍🌾" },
   { id: "shop", label: "Toko / Warung", emoji: "🏪" },
-  { id: "gov", label: "Kantor / Fasilitas Umum", emoji: "🏛️" },
+  { id: "gov", label: "Aparat Desa / Fasilitas Umum", emoji: "🏛️" },
 ];
 
 const emptyForm: FormState = {
