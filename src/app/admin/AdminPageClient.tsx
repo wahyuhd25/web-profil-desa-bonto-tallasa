@@ -6,6 +6,7 @@ import { auth } from "@/lib/firebase";
 import type { FarmPoint } from "@/types/farm";
 import { createFarm, deleteFarm, listFarms, updateFarm } from "@/lib/farms";
 import { useRouter } from "next/navigation";
+import { COMMODITY_OPTIONS, type CommodityId } from "@/data/commodities";
 
 // definisikan type marker secara eksplisit (harus sama dengan di FarmPoint)
 type MarkerType = "farmer" | "shop" | "gov";
@@ -16,21 +17,6 @@ type FormState = Omit<FarmPoint, "id" | "lat" | "lng"> & {
   lng: string;
   markerType: MarkerType;
 };
-
-const COMMODITY_OPTIONS = [
-  { id: "corn", label: "Jagung", emoji: "🌽" },
-  { id: "tomato", label: "Tomat", emoji: "🍅" },
-  { id: "eggplant", label: "Terong", emoji: "🍆" },
-  { id: "grape", label: "Anggur", emoji: "🍇" },
-  { id: "chili", label: "Cabai", emoji: "🌶️" },
-  { id: "rice", label: "Padi", emoji: "🌾" },
-  { id: "strawberry", label: "Stroberi", emoji: "🍓" },
-  { id: "clove", label: "Cengkeh", emoji: "🌸" },
-  { id: "cocoa", label: "Coklat", emoji: "🍫" },
-  { id: "candlenut", label: "Kemiri", emoji: "🌰" },
-  { id: "village_staff", label: "Aparat Desa", emoji: "🏛️" },
-];
-
 
 
 const SUBJECT_OPTIONS: { id: MarkerType; label: string; emoji: string }[] = [

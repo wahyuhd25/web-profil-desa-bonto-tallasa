@@ -2,31 +2,13 @@
 
 import { useEffect } from "react";
 import type { FarmPoint } from "@/types/farm";
+import { COMMODITY_OPTIONS, type CommodityId } from "@/data/commodities";
 
 type Props = {
   open: boolean;
   data: FarmPoint | null;
   onClose: () => void;
 };
-
-/**
- * Harus konsisten dengan COMMODITY_OPTIONS di admin page.
- * Kalau mau rapi, nanti bisa dipindah ke file shared, misal: "@/config/commodities".
- */
-const COMMODITY_OPTIONS = [
-  { id: "corn", label: "Jagung", emoji: "🌽" },
-  { id: "tomato", label: "Tomat", emoji: "🍅" },
-  { id: "eggplant", label: "Terong", emoji: "🍆" },
-  { id: "grape", label: "Anggur", emoji: "🍇" },
-  { id: "chili", label: "Cabai", emoji: "🌶️" },
-  { id: "rice", label: "Padi", emoji: "🌾" },
-  { id: "strawberry", label: "Stroberi", emoji: "🍓" },
-  { id: "clove", label: "Cengkeh", emoji: "🌸" },
-  { id: "cocoa", label: "Coklat", emoji: "🍫" },
-  { id: "candlenut", label: "Kemiri", emoji: "🌰" },
-  { id: "village_staff", label: "Aparat Desa", emoji: "🏛️" },
-];
-
 
 export default function OwnerModal({ open, data, onClose }: Props) {
   useEffect(() => {
