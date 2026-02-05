@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 /* ✅ SEO + Google + Site Name fix */
 export const metadata: Metadata = {
   title: {
-    default: "Website Profil Desa Bonto Tallasa",
+    default: "Profil Desa Bonto Tallasa Bantaeng",
     template: "%s | Desa Bonto Tallasa",
   },
   description: "Website resmi Desa Bonto Tallasa, Kecamatan Uluere, Kabupaten Bantaeng, Provinsi Sulawesi Selatan.",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    title: "Website Profil Desa Bonto Tallasa",
+    title: "Profil Desa Bonto Tallasa Bantaeng",
     description:
       "Website resmi Desa Bonto Tallasa, Kecamatan Uluere, Kabupaten Bantaeng, Provinsi Sulawesi Selatan.",
     siteName: "Desa Bonto Tallasa Bantaeng", 
