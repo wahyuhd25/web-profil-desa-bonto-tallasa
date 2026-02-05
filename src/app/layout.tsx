@@ -6,21 +6,42 @@ const jakartaSans = Plus_Jakarta_Sans({
   variable: "--font-jakarta-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
-  display: "swap", // ✅ better font loading on mobile
+  display: "swap",
 });
 
-/* ✅ FIX: viewport must be exported separately in Next.js 16 */
+/* ✅ Viewport (Next.js 16 correct way) */
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
 };
 
-/* ✅ SEO + Google Search Console verification */
+/* ✅ SEO + Google + Site Name fix */
 export const metadata: Metadata = {
-  title: "Website Profil Desa Bonto Tallasa",
-  description: "Website resmi Desa Bonto Tallasa",
+  title: {
+    default: "Website Profil Desa Bonto Tallasa",
+    template: "%s | Desa Bonto Tallasa",
+  },
+  description: "Website resmi Desa Bonto Tallasa, Kecamatan Uluere, Kabupaten Bantaeng, Provinsi Sulawesi Selatan.",
+  applicationName: "Desa Bonto Tallasa",
+
   verification: {
     google: "73w5HzKn1ak9YZA5As9Jh1wEQ9jHtJDaImiFQ7fJpuA",
+  },
+
+  openGraph: {
+    title: "Website Profil Desa Bonto Tallasa",
+    description:
+      "Website resmi Desa Bonto Tallasa, Kecamatan Uluere, Kabupaten Bantaeng, Provinsi Sulawesi Selatan.",
+    siteName: "Desa Bonto Tallasa Bantaeng", 
+    url: "https://web-profil-desa-bonto-tallasa-iord.vercel.app",
+    type: "website",
+    locale: "id_ID",
+  },
+
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
   },
 };
 
